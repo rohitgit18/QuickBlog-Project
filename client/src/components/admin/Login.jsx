@@ -1,12 +1,32 @@
 import React, { useState } from 'react'
+import { useAppContext } from '../../context/AppContext'
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { data } from 'react-router-dom';
 
 const Login = () => {
+
+    const {asios, setToken} = useAppContext();
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
     const handleSubmit = async (e)=>{
         e.preventDefault()
+        try {
+            const {data} = await axios.post('/api/admin/login', {email, password})
+
+            if (data.success) {
+                setToken(data.token)
+                localStorage.setItem('token', data.token)
+                axios.defaults.headers.common['Authorization'] = data.token;
+            }
+            else{
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
   return (
     <div className='flex items-center justify-center h-screen'>
@@ -21,13 +41,13 @@ const Login = () => {
                 <form onSubmit={handleSubmit} className='mt-6 w-full sm:max-w-md text-gray-600'>
                     <div className='flex flex-col'>
                         <label> Email </label>
-                        <input onChange={e=> setEmail(e.target.value={email})}
-                         type="email" required placeholder='your email id' 
+                        <input onChange={e=> setEmail(e.target.value)} value={email}
+                         type="e" required placeholder='your email id' 
                         className='border-b-2 border-gray-300 p-2 outline-none mb-6'/>
                     </div>
                     <div className='flex flex-col'>
                         <label> Password </label>
-                        <input onChange={e=> setPassword(e.target.value={password})} 
+                        <input onChange={e=> setPassword(e.target.value)} value={password} 
                         type="password" required placeholder='your password' 
                         className='border-b-2 border-gray-300 p-2 outline-none mb-6'/>
                     </div>
